@@ -1,0 +1,21 @@
+# build artifacts
+build
+bin
+dloadtool
+.dSYM
+*.pdb
+*.exe
+*.dll
+.cache
+# os
+.DS_Store
+# leftover/testing files
+*.esco
+*.nb
+*.img
+*.mbn
+*.cert
+*.bin
+*.pcapng
+*.gz
+compile_commands.json
