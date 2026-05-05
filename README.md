@@ -7,7 +7,7 @@ implemented.
 
 # NOTHING FUNCTIONAL IS IMPLEMENTED
 
-# dloadtool
+# rm-dloadtool
 
 Tool for interfacing with Nokia's "DLOAD" bootloader, as used in the Lumia
 series of Windows Phone 7 devices, over USB.
