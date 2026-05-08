@@ -1,6 +1,6 @@
--- Nokia DLOAD Wireshark Analyzer
+-- Nokia Lumia DLOAD Wireshark Analyzer
 -- by Emma / InvoxiPlayGames
--- https://github.com/InvoxiPlayGames/rm-dloadtool
+-- https://github.com/InvoxiPlayGames/lumia-dloadtool
 
 dload_protocol = Proto("dload", "Nokia DLOAD")
 
@@ -10,7 +10,7 @@ msg_type_table = {
     [0xbb0bb003] = "Version Get",
     [0xbb0bb004] = "Version Reply",
     [0xbb0bb005] = "Power Off",
-    [0xbb6bb601] = "Command: "
+    [0xbb6bb601] = "BB6 Message: "
 }
 
 bb6_tlv_table = {
@@ -27,7 +27,7 @@ bb6_tlv_table = {
     [0x40002] = "Submit Nokia Signature"
 }
 
-cmd_type_table = {
+bb6_cmd_table = {
     [0x1] = "Reset",
     [0x3] = "Control",
     [0x4] = "Send Certificate",
@@ -51,13 +51,13 @@ dload_ver = ProtoField.protocol("dload.version", "DLOAD Version")
 dload_ver_unk = ProtoField.bytes("dload.version.unk", "Unknown", base.NONE)
 dload_ver_timestamp = ProtoField.absolute_time("dload.version.timestamp", "Build Timestamp")
 
-dload_cmd = ProtoField.protocol("dload.cmd", "Command Info")
-dload_cmd_unk1 = ProtoField.uint32("dload.cmd.unk1")
-dload_cmd_unk2 = ProtoField.uint32("dload.cmd.unk2")
-dload_cmd_count = ProtoField.uint32("dload.cmd.tlv_count", "TLV Count")
+dload_bb6 = ProtoField.protocol("dload.bb6", "BB6 Message Info")
+dload_bb6_unk1 = ProtoField.uint32("dload.bb6.unk1")
+dload_bb6_unk2 = ProtoField.uint32("dload.bb6.unk2", "Message Type")
+dload_bb6_count = ProtoField.uint32("dload.bb6.tlv_count", "TLV Count")
 
 dload_req = ProtoField.protocol("dload.req", "Request")
-dload_req_cmd = ProtoField.uint32("dload.req.cmd", "Command ID", base.HEX, cmd_type_table)
+dload_req_cmd = ProtoField.uint32("dload.req.cmd", "Command ID", base.HEX, bb6_cmd_table)
 dload_req_seq = ProtoField.uint32("dload.req.sequence", "Sequence Number")
 
 dload_resp = ProtoField.protocol("dload.resp", "Response")
@@ -94,10 +94,10 @@ dload_protocol.fields = {
     dload_ver_unk,
     dload_ver_timestamp,
 
-    dload_cmd,
-    dload_cmd_unk1,
-    dload_cmd_unk2,
-    dload_cmd_count,
+    dload_bb6,
+    dload_bb6_unk1,
+    dload_bb6_unk2,
+    dload_bb6_count,
 
     dload_req,
     dload_req_cmd,
@@ -142,10 +142,10 @@ function dload_protocol.dissector(buffer, pinfo, tree)
 
     if msg_type == 0xbb6bb601 and msg_length == 0xC then
         cmdinfo_buf = buffer(8, 0xC)
-        local cmdtree = subtree:add(dload_cmd, cmdinfo_buf)
-        cmdtree:add_le(dload_cmd_unk1, cmdinfo_buf(0, 4))
-        cmdtree:add_le(dload_cmd_unk2, cmdinfo_buf(4, 4))
-        cmdtree:add_le(dload_cmd_count, cmdinfo_buf(8, 4))
+        local cmdtree = subtree:add(dload_bb6, cmdinfo_buf)
+        cmdtree:add_le(dload_bb6_unk1, cmdinfo_buf(0, 4))
+        cmdtree:add_le(dload_bb6_unk2, cmdinfo_buf(4, 4))
+        cmdtree:add_le(dload_bb6_count, cmdinfo_buf(8, 4))
         cmd_count = cmdinfo_buf(8, 4):le_uint()
         cur_pos = 0x14
         for i=1,cmd_count do
@@ -163,7 +163,7 @@ function dload_protocol.dissector(buffer, pinfo, tree)
                 req_tree = subtree:add(dload_req, cmd_buf)
                 req_tree:add_le(dload_req_seq, cmd_buf(0, 0x4))
                 req_tree:add_le(dload_req_cmd, cmd_buf(4, 0x4))
-                cmd_info = " (" .. (cmd_type_table[cmd_id] or string.format("Unknown 0x%x", cmd_id)) .. ")"
+                cmd_info = " (" .. (bb6_cmd_table[cmd_id] or string.format("Unknown 0x%x", cmd_id)) .. ")"
             elseif cmd_type == 0x30002 and cmd_len == 0xC then
                 -- response metadata
                 resp_tree = subtree:add(dload_req, cmd_buf)

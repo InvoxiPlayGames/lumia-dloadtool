@@ -1,4 +1,4 @@
-// Nokia DLOAD .cert file format pattern (for WP7 devices)
+// Nokia Lumia DLOAD .cert file format pattern (for WP7 devices)
 // by Emma / InvoxiPlayGames, 2026
 // 
 // Changelog:
@@ -23,7 +23,7 @@ struct target_info {
     u64 flash_size;
   } else if (target_type == 2) {
     u32 unk1; // always 0x0?
-    char filename[info_size - 0x10];
+    char filename[info_size - 0x10]; // filename to put in image3
   }
 };
 

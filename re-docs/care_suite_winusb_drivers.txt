@@ -1,0 +1,19 @@
+Signed, official WinUSB drivers ("Care Suite USB Connectivity" package) for
+interfacing with "Nokia DLOAD" are included in Windows Device Recovery Tool:
+
+Official MSFT link for the HoloLens 1 "offline" version:
+https://download.microsoft.com/download/266c0370-a6b6-4a49-ac55-6cb2e086b14c/wdrt-hl1.zip
+see 7DDBA522-59E1-4CB3-9B74-506EF9939622/WinUsbDriversExt.msi
+
+Web Archive link for the WinUSB drivers:
+https://web.archive.org/web/20230822021720id_/https://repairavoidance.blob.core.windows.net/packages/Drivers/WinUsbDriversExt/1.1.24.1544/WinUsbDriversExt.msi
+
+sha256(WinUsbDriversExt.msi) =
+  c925dd33d469dcb0e9378bea0aa517d780c38926d1495f1b0224ee7e90b04c2f
+
+these will break DTPT in the Zune app if installed after the Zune app;
+use Device Manager to update the driver from "Care Suite USB Connectivity" to
+"Windows Phone USB" when the phone is in normal mode to fix this.
+
+TODO: check what Windows versions these work with
+  (works with 64-bit 8.1, 10, 11)

@@ -1,0 +1,11 @@
+# udev rules for handling "gen 1" Lumia phones in their bootloaders
+# (Lumia 800, 710, 900 and 610)
+
+# DLOAD
+# allow access by all user applications
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0421", ATTRS{idProduct}=="05ee", MODE="0666", TAG+="uaccess"
+
+# QCOM MSM mode
+# allow r/w access to all user applications and disallows automount
+# this is probably not wise but it stops tools needing the device from running as root
+SUBSYSTEM=="block", ENV{ID_BUS}=="usb", ATTRS{idVendor}=="05c6", ATTRS{idProduct}=="9006", MODE="0666", TAG+="uaccess", ENV{UDISKS_IGNORE}="1"

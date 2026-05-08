@@ -2,12 +2,12 @@
 
 I started working on this in late 2024 / early 2025 based off packet captures
 of some tool and reverse engineering of the bootloader itself. Currently almost
-all "BB0" and "BB6" commands are loosely documented in headers but nothing is
-implemented.
+all "BB0" and "BB6" commands are loosely documented in headers.
 
-# NOTHING FUNCTIONAL IS IMPLEMENTED
+Some **very basic** functionality is implemented that can talk to the bootloader
+but no flashing functionality exists yet.
 
-# rm-dloadtool
+# lumia-dloadtool
 
 Tool for interfacing with Nokia's "DLOAD" bootloader, as used in the Lumia
 series of Windows Phone 7 devices, over USB.

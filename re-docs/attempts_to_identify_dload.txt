@@ -1,0 +1,29 @@
+The DLOAD bootloader provides no trivial way to figure out what model of phone
+is connected from the PC side. There are two pieces of information sent by
+DLOAD - the version info and the hashes available in the service/eng backdoor
+(BB6 command 0x200) - that *might* be useful for this.
+
+Lumia 800 (RM-801, 059N205, only 1 device):
+  Build timestamp: 1317303536
+  Version data: 00 00 01 00 04 00 00 01 0a 00 00 00
+
+Lumia 610 (RM-835, 059P6L6, only 1 device):
+  Build timestamp: 1329903446
+  Version data: 01 00 01 00 00 00 00 01 01 00 00 00
+  From command 0x200:
+   0x72: 501aff8d3a1d2b693bd8fec40c1c55c5cb7f7e7d
+   0x73: 501aff8d3a1d2b693bd8fec40c1c55c5cb7f7e7d
+   0x74: 501aff8d3a1d2b693bd8fec40c1c55c5cb7f7e7d
+
+TODO: fill this in! If values are the same across variants, remove the variant.
+
+---
+
+The hashes in the .cert files can also be used to determine which model of
+phone the files are destined for.
+  RM-801, RM-819:
+    0C203F23776466E755E9955A9F8F9A39A0888B8E
+  RM-803, RM-809:
+    C72DBA3ABED42215584093FA9DE247381D6062B4
+  RM-835:
+    0A3B18ABC63D2CF5A23BEBC1500E56E22163B717

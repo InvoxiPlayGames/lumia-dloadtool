@@ -11,10 +11,13 @@
 #define BB0_RESET 0xbb0bb002
 #define BB0_GET_VERSION 0xbb0bb003
 #define BB0_REPLY_VERSION 0xbb0bb004
-#define BB0_POWER_OFF 0xbb0bb005
+#define BB0_POWER_OFF 0xbb0bb005 // seems to actually reset on some devices
 
 // magic value for BB6 commands
 #define BB6_MAGIC 0xbb6bb601
+// static msg type value in the BB6 header
+#define BB6_MSG_TYPE_REQ 0x2
+#define BB6_MSG_TYPE_RES 0x3
 
 // contains a log message
 #define BB6_LOG_TLV 0x10001
@@ -63,6 +66,8 @@
 #define BB6_SUBMIT_NOKIA_SIG_TLV 0x40002
 
 // TODO: document
+// definitely don't touch this one though it fucks with the modem partitions
+// very high chance of either a brick or never able to cellular again
 #define BB6_TYPE_MODEM_BACKUP_RESTORE 0x10000
 
 // TODO: document
