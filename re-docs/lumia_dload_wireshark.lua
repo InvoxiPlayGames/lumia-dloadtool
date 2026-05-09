@@ -62,8 +62,13 @@ dload_req_seq = ProtoField.uint32("dload.req.sequence", "Sequence Number")
 
 dload_resp = ProtoField.protocol("dload.resp", "Response")
 dload_resp_seq = ProtoField.uint32("dload.resp.sequence", "Sequence Number")
-dload_resp_rcode = ProtoField.uint32("dload.resp.return_code", "Sequence Number")
+dload_resp_rcode = ProtoField.uint32("dload.resp.return_code", "Return Code", base.HEX)
 dload_resp_unk = ProtoField.uint32("dload.resp.unk")
+
+dload_ctrl = ProtoField.protocol("dload.ctrl", "Control Message")
+dload_ctrl_id = ProtoField.uint32("dload.ctrl.id", "Control ID", base.HEX)
+dload_ctrl_len = ProtoField.uint32("dload.ctrl.len", "Length")
+dload_ctrl_data = ProtoField.bytes("dload.ctrl.data", "Data", base.NONE)
 
 dload_cert = ProtoField.protocol("dload.cert", "Certificate Metadata")
 dload_cert_length = ProtoField.uint32("dload.cert.length", "Length")
@@ -108,6 +113,11 @@ dload_protocol.fields = {
     dload_resp_rcode,
     dload_resp_unk,
 
+    dload_ctrl,
+    dload_ctrl_id,
+    dload_ctrl_len,
+    dload_ctrl_data,
+
     dload_cert,
     dload_cert_length,
     dload_cert_unk,
@@ -130,8 +140,8 @@ function dload_protocol.dissector(buffer, pinfo, tree)
     local msg_type = buffer(0, 4):le_uint()
     local msg_length = buffer(4, 4):le_uint() -- the bootloader seems to largely ignore this
 
-    -- uncomment if you think something is missing
-    --if not msg_type_table[msg_type] then return end
+    -- comment if you think something is missing
+    if not msg_type_table[msg_type] then return end
 
     local subtree = tree:add(dload_protocol, buffer())
     subtree:add_le(dload_msg_type, buffer(0, 4))
@@ -166,7 +176,7 @@ function dload_protocol.dissector(buffer, pinfo, tree)
                 cmd_info = " (" .. (bb6_cmd_table[cmd_id] or string.format("Unknown 0x%x", cmd_id)) .. ")"
             elseif cmd_type == 0x30002 and cmd_len == 0xC then
                 -- response metadata
-                resp_tree = subtree:add(dload_req, cmd_buf)
+                resp_tree = subtree:add(dload_resp, cmd_buf)
                 resp_tree:add_le(dload_resp_seq, cmd_buf(0, 0x4))
                 resp_tree:add_le(dload_resp_rcode, cmd_buf(4, 0x4))
                 resp_tree:add_le(dload_resp_unk, cmd_buf(8, 0x4))
@@ -193,6 +203,13 @@ function dload_protocol.dissector(buffer, pinfo, tree)
                 cert_tree:add_le(dload_cert_length, cmd_buf(0, 4))
                 cert_tree:add_le(dload_cert_unk, cmd_buf(4, 4))
                 cert_tree:add_le(dload_cert_kid, cmd_buf(8, 4))
+            elseif cmd_type == 0x10003 and cmd_len >= 0x8 then
+                ctrl_tree = subtree:add(dload_ctrl, cmd_buf)
+                ctrl_id = cmd_buf(0, 4):le_uint()
+                ctrl_tree:add_le(dload_ctrl_id, cmd_buf(0, 4))
+                ctrl_tree:add_le(dload_ctrl_len, cmd_buf(4, 4))
+                ctrl_tree:add(dload_ctrl_data, cmd_buf(8))
+                cmd_info = string.format(" (0x%x)", ctrl_id)
             else
                 subtree:add(dload_unparsed, cmd_buf):set_text(bb6_tlv_table[cmd_type] or string.format("Unknown 0x%08x", cmd_type))
             end
