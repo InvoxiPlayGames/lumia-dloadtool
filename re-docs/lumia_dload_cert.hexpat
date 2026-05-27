@@ -29,13 +29,13 @@ struct target_info {
 
 struct chunk_info_sha1 {
   u64 start;
-  u64 length;
+  u64 end;
   u8 sha1sum[0x14];
 };
 
 struct chunk_info_sha256 {
   u64 start;
-  u64 length;
+  u64 end;
   u8 sha256sum[0x20];
 };
 

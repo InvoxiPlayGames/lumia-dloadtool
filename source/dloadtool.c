@@ -13,6 +13,7 @@
 
 #include "dload.h"
 #include "device_connection.h"
+#include "rm_cert.h"
 
 void hexdump(const void *buf, size_t len)
 {
@@ -20,7 +21,7 @@ void hexdump(const void *buf, size_t len)
         return;
 
     for (size_t i = 0; i < len; i++)
-        printf("%02x", ((uint8_t *)buf)[i]);
+        printf("%02X", ((uint8_t *)buf)[i]);
 
     printf("\n");
 }
@@ -137,8 +138,61 @@ void do_tests()
     }
 }
 
+void parse_rm_cert(const char *filename)
+{
+    FILE *fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("failed to open file\n");
+        return;
+    }
+    rm_cert_t *parsed = NULL;
+    int r = rm_cert_from_file(fp, &parsed);
+    fclose(fp);
+    if (r != kRmC_Success) {
+        printf("failed to parse (%i)\n", r);
+        return;
+    }
+
+    // print some basic details
+    printf("certificate timestamp: %i\n", LE(parsed->info->timestamp));
+    if (LE(parsed->info->sign_enc_flag_maybe)) {
+        printf("data file is encrypted\n");
+    }
+    if (LE(parsed->target->target_type) == kTargetFileWrite) {
+        printf("target file: %s\n", parsed->file);
+    } else if (LE(parsed->target->target_type) < kTargetFileWrite) {
+        printf("target flash %s:\n", (LE(parsed->target->target_type) == kTargetFlashWrite) ? "write" : "erase");
+        printf("  start: 0x%llX\n", LE64(parsed->flash->flash_start));
+        printf("  size:  0x%llX\n", LE64(parsed->flash->flash_size));
+    }
+    if (parsed->chunk_hdr != NULL) {
+        if (LE(parsed->chunk_hdr->hash_type) == kHashSha256) {
+            rm_cert_chunk_sha256_t *chunks = (rm_cert_chunk_sha256_t *)parsed->chunks;
+            for (int i = 0; i < LE(parsed->chunk_hdr->count); i++) {
+                printf("chunk %i:\n", i + 1);
+                printf("  range: 0x%llX - 0x%llX\n", chunks[i].start, chunks[i].end);
+                printf("  hash:  ");
+                hexdump(chunks[i].sha256, 0x20);
+            }
+        }
+    }
+    printf("key id:   0x%02X\n", LE(parsed->sig_info->key_id));
+    if (LE(parsed->sig_info->hash_type) == kHashSha1) {
+        printf("key hash: ");
+        hexdump(parsed->pub_key_hash, 0x14);
+    }
+
+    rm_cert_free(parsed);
+    return;
+}
+
 int main(int argc, char **argv)
 {
+    if (argc >= 3 && strcasecmp(argv[1], "fwinfo") == 0) {
+        parse_rm_cert(argv[2]);
+        return 0;
+    }
+
     // initialise the usb library
     dload_init_usb();
 
