@@ -48,6 +48,57 @@ static int winusb_err_convert(DWORD err)
     }
 }
 
+static inline bool hex_to_uint16(const char *str, uint16_t *out)
+{
+    if (out == NULL) return false;
+    if (strlen(str) < 4) return false;
+    *out = 0;
+    for (int i = 0; i < 4; i++) {
+        uint8_t nibble = 0x0;
+        if (str[i] >= '0' && str[i] <= '9') nibble = str[i] - '0';
+        else if (str[i] >= 'A' && str[i] <= 'F') nibble = (str[i] - 'A') + 0xA;
+        else if (str[i] >= 'a' && str[i] <= 'f') nibble = (str[i] - 'a') + 0xA;
+        else return false;
+        *out |= nibble << ((3 - i) * 4);
+    }
+    return true;
+}
+
+static int winusb_to_vidpid(const char *string, uint16_t *vid, uint16_t *pid)
+{
+#define WUSB_TEMPLATE "\\\\?\\USB#VID_....&PID_...."
+    const char *template = WUSB_TEMPLATE;
+    // make sure the provided string is at least the size of the template
+    if (strlen(string) < sizeof(WUSB_TEMPLATE)-1)
+        return -1;
+    // make sure the string matches the template, with . acting as a filler character
+    for (int i = 0; i < sizeof(WUSB_TEMPLATE)-1; i++)
+        if (string[i] != template[i] && template[i] != '.')
+            return -2;
+    // parse the hex
+    uint16_t vidwork = 0;
+    uint16_t pidwork = 0;
+    if (!hex_to_uint16(string + 12, &vidwork)) return -3;
+    if (!hex_to_uint16(string + 21, &pidwork)) return -4;
+    // output vidpid
+    if (vid != NULL)
+        *vid = vidwork;
+    if (pid != NULL)
+        *pid = pidwork;
+#undef WUSB_TEMPLATE
+    return 0;
+}
+
+static bool is_any_device_of_type_present(LPGUID lpGuid)
+{
+    CONFIGRET cr = CR_SUCCESS;
+    ULONG     DeviceInterfaceListLength = 0;
+    cr = CM_Get_Device_Interface_List_SizeA(&DeviceInterfaceListLength, lpGuid, NULL, CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
+    if (cr != CR_SUCCESS)
+        return false; // assume not
+    return DeviceInterfaceListLength > 2;
+}
+
 int dload_init_usb()
 {
     // WinUSB doesn't need this
@@ -67,7 +118,11 @@ int dload_detect_device()
     
     int r = kDlDev_NoneFound;
 
-    // TODO(Emma): detect devices present in the other modes (main, FFU/SLDR, BLDR, mass storage)
+    bool has_seen_ms_mode = is_any_device_of_type_present((LPGUID)&GUID_DEVINTERFACE_WMZuneSerUSB);
+    if (has_seen_ms_mode)
+        r = kDlDev_WPModeFound;
+
+    // TODO(Emma): detect devices present in the other modes (only missing is BLDR, mass storage)
     //             probably have to use setupapi rather than configmgr
     // begin WinUsb sample code
     CONFIGRET cr = CR_SUCCESS;
@@ -109,22 +164,38 @@ int dload_detect_device()
         goto end;
     }
 
+    // device found?
     if (DeviceInterfaceList[0] != 0) {
         // detect if we have several devices
-        if (DeviceInterfaceListLength > strlen(DeviceInterfaceList) + 1)
+        if (DeviceInterfaceListLength > strlen(DeviceInterfaceList) + 2)
             r = kDlDev_MultipleFound;
-        printf("Found WinUsb device: %s\n", DeviceInterfaceList);
-        // TODO(Emma): check VID/PID to see if it's actually DLOAD and not another mode
-
-        hDeviceHandle = CreateFileA(DeviceInterfaceList, GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
-        if (hDeviceHandle != NULL) {
-            r = kDlDev_Success;
-        } else {
-            r = winusb_err_convert(GetLastError());
+        if (has_seen_ms_mode) 
+            r = kDlDev_MultipleFound;
+        
+        if (r != kDlDev_NoneFound) goto end;
+        
+        // make sure it's actually in DLOAD mode and not another care suite device
+        uint16_t vid = 0, pid = 0;
+        winusb_to_vidpid(DeviceInterfaceList, &vid, &pid); // TODO(Emma): should probably check err result here
+        if (vid == NOKIA_VID && pid == DLOAD_PID) {
+            hDeviceHandle = CreateFileA(DeviceInterfaceList, GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+            if (hDeviceHandle != NULL) {
+                r = kDlDev_Success;
+            } else {
+                r = winusb_err_convert(GetLastError());
+            }
+        } else if (vid == MICROSOFT_VID) {
+            // care suite USB connectivity can have microsoft device IDs show up
+            if (pid == WM7_BLDR_PID || pid == WM7_FFU_PID)
+                r = kDlDev_WPBLModeFound;
+            else if (pid == WM7_MAINOS_PID)
+                r = kDlDev_WPModeFound;
         }
     }
 
 end:
+    if (DeviceInterfaceList != NULL)
+        free(DeviceInterfaceList);
     return r;
 }
 
@@ -139,6 +210,7 @@ int dload_open_device()
         hDeviceHandle = INVALID_HANDLE_VALUE;
         return winusb_err_convert(GetLastError());
     }
+    // TODO(Emma): set the timeouts
 
     return kDlDev_Success;
 }
