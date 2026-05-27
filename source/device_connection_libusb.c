@@ -1,3 +1,5 @@
+#ifndef _WIN32
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -176,3 +178,5 @@ int dload_device_recv_packet(uint8_t **out_buffer, size_t *out_len)
 
     return kDlDev_Success;
 }
+
+#endif // _WIN32

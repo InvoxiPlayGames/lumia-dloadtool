@@ -7,6 +7,7 @@
 
 #include "bb6_tlv.h"
 #include "dload_constants.h"
+#include "endian.h"
 
 // TODO(Emma): give this code a heavy read-over because i'm not the proudest of this
 //   security isn't a massive concern given it's a semi-trustworthy USB device but it would be nice to be safe

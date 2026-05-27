@@ -9,11 +9,11 @@ typedef struct _rm_cert_hdr_t {
     uint32_t size;
 } rm_cert_hdr_t;
 
-typedef struct _rm_cert_chunk_t {
+typedef struct _rm_cert_chunk_s256_t {
     uint64_t start;
     uint64_t length;
-    uint8_t checksum[0x20];
-} rm_cert_chunk_t;
+    uint8_t sha256[0x20];
+} rm_cert_chunk_s256_t;
 
 typedef enum _rm_cert_target_e {
     kTargetFlashWrite = 0,
@@ -22,7 +22,6 @@ typedef enum _rm_cert_target_e {
 } rm_cert_target_e;
 
 typedef struct _rm_cert_flash_target_t {
-    uint32_t info_size;
     uint32_t target_type;
     uint32_t unk_0x4; // always 0x4
     uint32_t key_id;
@@ -31,7 +30,6 @@ typedef struct _rm_cert_flash_target_t {
 } rm_cert_flash_target_t;
 
 typedef struct _rm_cert_sig_info_t {
-    uint32_t size; // 0x20
     uint32_t unk1; // always 0x0?
     uint32_t unk2; // always 0x71?
     uint32_t unk3; // always 0x1?
@@ -54,20 +52,5 @@ typedef enum _rm_cert_stage_e {
 } rm_cert_stage_e;
 
 #define RMCERT_WP70_MAGIC 0x57503730
-typedef struct _rm_cert_info_t {
-    rm_cert_hdr_t header;
-    uint8_t pub_key_sha1[0x14];
-    uint32_t wp70_magic;
-    uint32_t unk_zero1;
-    uint32_t unk1;
-    uint32_t timestamp;
-    uint32_t timestamp_ms;
-    uint32_t unk2;
-    uint32_t unk3;
-    uint32_t target_type; // possibly? 0 in nand, 1 in adsp/amss
-    uint64_t flash_stage; // possibly? see rm_cert_stage_e
-    uint64_t unk_zero2;
-    uint64_t unk_zero3;
-} rm_cert_info_t;
 
 #endif // RM_CERT_H

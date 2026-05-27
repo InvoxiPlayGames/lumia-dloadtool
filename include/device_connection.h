@@ -17,8 +17,13 @@ typedef enum _dload_device_errors_t {
     // misc device errors
     kDlDev_DeviceNotOpen = -1020,
     kDlDev_MessageTimeout = -1021,
-    // usb backend errors
+    // usb backend errors (libusb)
     kDlDev_LibusbError = -2000,
+    // usb backend errors (WinUSB)
+    kDlDev_WinUsb_InvalidHandle = -3000,
+    kDlDev_WinUsb_BadDevice = -3001,
+    kDlDev_WinUsb_ConfigErr = -3098,
+    kDlDev_WinUsb_Unknown = -3099,
     // misc random errors
     kDlDev_OutOfMemory = -4444,
 } dload_device_errors_t;

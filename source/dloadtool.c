@@ -9,6 +9,7 @@
 #include "bb6_msg_builder.h"
 #include "bb6_tlv.h"
 #include "dload_constants.h"
+#include "endian.h"
 
 #include "dload.h"
 #include "device_connection.h"
