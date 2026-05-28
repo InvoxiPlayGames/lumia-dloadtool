@@ -137,7 +137,6 @@ int dload_detect_device()
         cr = CM_Get_Device_Interface_List_SizeA(&DeviceInterfaceListLength, (LPGUID)&GUID_DEVINTERFACE_CareSuiteUSB, NULL, CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
 
         if (cr != CR_SUCCESS) {
-            wr = CM_MapCrToWin32Err(cr, ERROR_INVALID_DATA);
             break;
         }
 
@@ -151,16 +150,13 @@ int dload_detect_device()
 
         if (cr != CR_SUCCESS) {
             free(DeviceInterfaceList);
-            if (cr != CR_BUFFER_SMALL) {
-                wr = CM_MapCrToWin32Err(cr, ERROR_INVALID_DATA);
-            }
         }
     } while (cr == CR_BUFFER_SMALL);
 
     // TODO(Emma): find out what error codes are meaningful from configmgr
-    if (wr != 0) {
-        printf("ConfigMgr Error: 0x%08x, Win: 0x%08x\n", cr, wr);
-        r = winusb_err_convert(wr);
+    if (cr != CR_SUCCESS) {
+        printf("ConfigMgr Error: 0x%08x\n", cr);
+        r = kDlDev_WinUsb_ConfigErr - -cr;
         goto end;
     }
 

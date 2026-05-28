@@ -22,7 +22,7 @@ typedef enum _dload_device_errors_t {
     // usb backend errors (WinUSB)
     kDlDev_WinUsb_InvalidHandle = -3000,
     kDlDev_WinUsb_BadDevice = -3001,
-    kDlDev_WinUsb_ConfigErr = -3098,
+    kDlDev_WinUsb_ConfigErr = -3040,
     kDlDev_WinUsb_Unknown = -3099,
     // misc random errors
     kDlDev_OutOfMemory = -4444,

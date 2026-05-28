@@ -96,7 +96,7 @@ int rm_cert_from_buffer(void *buf, size_t buf_sz, rm_cert_t *out) {
             if (out->chunks == NULL)
                 return kRmC_FailedBoundsCheck;
         } else {
-            return kUnsupportedHashType;
+            return kRmC_UnsupportedHashType;
         }
     }
 
@@ -118,7 +118,7 @@ int rm_cert_from_buffer(void *buf, size_t buf_sz, rm_cert_t *out) {
     } else if (LE(out->sig_info->hash_type) == kHashSha256) {
         out->pub_key_hash = safe_buffer_read(out->sig_info, sig_info_sz, sizeof(rm_cert_sig_info_t), 0x20);
     } else {
-        return kUnsupportedHashType;
+        return kRmC_UnsupportedHashType;
     }
 
     // read the signature header
