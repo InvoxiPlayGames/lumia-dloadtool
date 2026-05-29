@@ -14,6 +14,7 @@
 #include "dload.h"
 #include "device_connection.h"
 #include "rm_cert.h"
+#include "firmware_verify.h"
 
 void hexdump(const void *buf, size_t len)
 {
@@ -186,10 +187,47 @@ void parse_rm_cert(const char *filename)
     return;
 }
 
+void verify_rm_file(const char *cert_filename, const char *data_filename)
+{
+    FILE *cfp = fopen(cert_filename, "rb");
+    if (cfp == NULL) {
+        printf("failed to open certificate file\n");
+        return;
+    }
+    rm_cert_t *parsed = NULL;
+    int r = rm_cert_from_file(cfp, &parsed);
+    fclose(cfp);
+    if (r != kRmC_Success) {
+        printf("failed to parse certificate (%i)\n", r);
+        return;
+    }
+
+    FILE *fp = fopen(data_filename, "rb");
+    if (fp == NULL) {
+        printf("failed to open data file\n");
+        return;
+    }
+    printf("verifying checksum... ");
+    r = verify_firmware_checksum(parsed, fp, 0);
+    if (r != 0) {
+        printf("failed to verify firmware checksum (%i)\n", r);
+    } else {
+        printf("firmware checksum verified successfully!\n");
+    }
+    fclose(fp);
+
+    rm_cert_free(parsed);
+    return;
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 3 && strcasecmp(argv[1], "fwinfo") == 0) {
         parse_rm_cert(argv[2]);
+        return 0;
+    }
+    if (argc >= 4 && strcasecmp(argv[1], "fwverify") == 0) {
+        verify_rm_file(argv[2], argv[3]);
         return 0;
     }
 

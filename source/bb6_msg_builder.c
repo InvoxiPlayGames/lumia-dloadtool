@@ -7,6 +7,7 @@
 #include "bb6_msg_builder.h"
 #include "bb6_tlv.h"
 #include "dload_constants.h"
+#include "dload.h"
 #include "endian.h"
 
 static int bb6_sequence_num = 0;
@@ -83,7 +84,7 @@ uint8_t *bb6_serialize_request(bb6_msg_inprog_t *request, size_t *out_len)
         return NULL;
 
     // find out how big we have to make our buffer
-    size_t buf_sz = 0x8 + sizeof(BB6_HEADER_t) + (request->tlv_num * 0x8);
+    size_t buf_sz = sizeof(dload_hdr_t) + sizeof(BB6_HEADER_t) + (request->tlv_num * 0x8);
     for (int i = 0; i < request->tlv_num; i++)
         buf_sz += request->tlv[i].length;
 
@@ -95,9 +96,10 @@ uint8_t *bb6_serialize_request(bb6_msg_inprog_t *request, size_t *out_len)
     // build out the header
     uint8_t *data_ptr = out_buf;
     // message header
-    *(uint32_t *)(data_ptr + 0x0) = LE(BB6_MAGIC);
-    *(uint32_t *)(data_ptr + 0x4) = LE(sizeof(BB6_HEADER_t));
-    data_ptr += 0x8;
+    dload_hdr_t *dld_hdr = (dload_hdr_t *)data_ptr;
+    dld_hdr->msg_type = LE(BB6_MAGIC);
+    dld_hdr->msg_length = LE(sizeof(BB6_HEADER_t));
+    data_ptr += sizeof(dload_hdr_t);
     // BB6 header
     BB6_HEADER_t *bb6_hdr = (BB6_HEADER_t *)data_ptr;
     bb6_hdr->unk_0x1 = LE(0x1);
