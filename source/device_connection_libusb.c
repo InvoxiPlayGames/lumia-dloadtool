@@ -39,7 +39,7 @@ static libusb_device_handle *device_handle = NULL;
 // 10 seconds is a lot.. but flashing can take a while!
 #define DEVICE_TIMEOUT_MS 10000
 
-int dload_init_usb()
+int dload_init_usb(void)
 {
     // init the libusb context
 #if LIBUSB_API_VERSION >= 0x0100010A
@@ -54,13 +54,13 @@ int dload_init_usb()
     return kDlDev_Success;
 }
 
-void dload_close_usb()
+void dload_close_usb(void)
 {
     // close the usb library
     libusb_exit(ctx);
 }
 
-int dload_detect_device()
+int dload_detect_device(void)
 {
     // if we already have a device, report back and don't scan again
     if (lusb_device != NULL)
@@ -124,7 +124,7 @@ int dload_detect_device()
     return r;
 }
 
-int dload_open_device()
+int dload_open_device(void)
 {
     if (lusb_device == NULL)
         return kDlDev_NoneFound;
@@ -140,7 +140,7 @@ int dload_open_device()
     return kDlDev_Success;
 }
 
-int dload_close_device()
+int dload_close_device(void)
 {
     // make sure we have a device open
     if (device_handle == NULL)

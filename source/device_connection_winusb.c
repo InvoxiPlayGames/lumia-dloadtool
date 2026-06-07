@@ -118,18 +118,18 @@ static bool is_any_device_of_type_present(LPGUID lpGuid)
     return DeviceInterfaceListLength > 2;
 }
 
-int dload_init_usb()
+int dload_init_usb(void)
 {
     // WinUSB doesn't need this
     return kDlDev_Success;
 }
 
-void dload_close_usb()
+void dload_close_usb(void)
 {
     // WinUSB doesn't need this
 }
 
-int dload_detect_device()
+int dload_detect_device(void)
 {
     // if we already have a device, report back and don't scan again
     if (hDeviceHandle != INVALID_HANDLE_VALUE)
@@ -214,7 +214,7 @@ end:
     return r;
 }
 
-int dload_open_device()
+int dload_open_device(void)
 {
     if (hDeviceHandle == INVALID_HANDLE_VALUE)
         return kDlDev_NoneFound;
@@ -230,7 +230,7 @@ int dload_open_device()
     return kDlDev_Success;
 }
 
-int dload_close_device()
+int dload_close_device(void)
 {
     // make sure we have a device open
     if (hWinusbHandle == INVALID_HANDLE_VALUE)

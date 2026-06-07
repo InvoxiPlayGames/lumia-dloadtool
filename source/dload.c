@@ -107,7 +107,7 @@ end:
     return r;
 }
 
-int dload_reset()
+int dload_reset(void)
 {
     int r = 0;
 
@@ -132,7 +132,7 @@ end:
     return r;
 }
 
-int dload_power_off()
+int dload_power_off(void)
 {
     int r = 0;
 

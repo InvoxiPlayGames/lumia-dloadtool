@@ -47,12 +47,12 @@ typedef enum _dload_device_errors_t {
     kDlDev_OutOfMemory = -4444,
 } dload_device_errors_t;
 
-int dload_init_usb();
-void dload_close_usb();
+int dload_init_usb(void);
+void dload_close_usb(void);
 
-int dload_detect_device();
-int dload_open_device();
-int dload_close_device();
+int dload_detect_device(void);
+int dload_open_device(void);
+int dload_close_device(void);
 
 int dload_device_send_packet(const uint8_t *buffer, size_t buffer_len);
 int dload_device_recv_packet(uint8_t **out_buffer, size_t *out_len);

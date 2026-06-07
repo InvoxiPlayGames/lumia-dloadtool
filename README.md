@@ -20,7 +20,8 @@ anything goes wrong.
 
 Compile with CMake. **Pre-compiled release or CI builds are not available yet.**
 
-**(Non-Windows)** Requires libusb-1.0 development packages installed.
+**(Non-Windows)** Requires pkgconfig and libusb-1.0 development packages
+installed.
 
 **(Windows)** Builds with MINGW64 (clang or GCC), **not** MSVC.
 
@@ -73,6 +74,7 @@ Use Care Suite for that.
 * Library-ize, C#/Python/Rust bindings
 * Code clean-up (lots of duplicated code!)
 * Make WinUSB code better.
+* Improvements for i686 and other non-x86_64 systems.
 
 (and more! see "TODO" in the codebase.)
 

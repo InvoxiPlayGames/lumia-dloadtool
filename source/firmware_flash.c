@@ -44,13 +44,16 @@ static int flash_firmware_chunk(rm_cert_t *cert, int chunk_i, FILE *fp, long off
     {
         // get the chunk's info
         rm_cert_chunk_sha256_t *chunk = &((rm_cert_chunk_sha256_t *)cert->chunks)[chunk_i];
-        long chunk_offset = LE(chunk->start) + offset;
-        long chunk_size = LE(chunk->end) - LE(chunk->start) + 1;
+        long chunk_offset = LE64(chunk->start) + offset;
+        long chunk_size = LE64(chunk->end) - LE64(chunk->start) + 1;
         // allocate a buffer for the chunk
         void *chunk_data = malloc(chunk_size);
         if (chunk_data == NULL)
             return -3; // out of memory
-        fseek(fp, chunk_offset, SEEK_SET);
+        if (fseek(fp, chunk_offset, SEEK_SET) != 0) {
+            free(chunk_data);
+            return -6; // failed to seek to chunk
+        }
         if (fread(chunk_data, 1, chunk_size, fp) != chunk_size) {
             free(chunk_data);
             return -4; // failed to read chunk from file
@@ -59,8 +62,11 @@ static int flash_firmware_chunk(rm_cert_t *cert, int chunk_i, FILE *fp, long off
         uint8_t s256_out[0x20];
         sha256(chunk_data, chunk_size, s256_out);
         // compare to original
-        if (memcmp(chunk->sha256, s256_out, 0x20) != 0)
+        if (memcmp(chunk->sha256, s256_out, 0x20) != 0) {
+            printf("invalid checksum for chunk %i\n", chunk_i);
+            free(chunk_data);
             return -5; // invalid checksum
+        }
 
         // okay, now we split that into sub-chunks and send it to the device
         //  scary scary... five nights and freddy and whatnot..

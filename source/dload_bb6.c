@@ -53,6 +53,7 @@ int dload_do_control(uint32_t ctrl_reg, uint32_t ctrl_val)
     r = bb6_add_tlv(newmsg, BB6_CONTROL_TLV, &ctrl, sizeof(BB6_CONTROL_TLV_t));
     if (r != 0) {
         printf("%s: error adding metadata to the request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -61,6 +62,7 @@ int dload_do_control(uint32_t ctrl_reg, uint32_t ctrl_val)
     uint8_t *bb6bytes = bb6_serialize_request(newmsg, &bb6byteslen);
     if (bb6bytes == NULL) {
         printf("%s: error serializing BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -101,6 +103,11 @@ int dload_do_control(uint32_t ctrl_reg, uint32_t ctrl_val)
 
 int dload_send_cert(rm_cert_t *cert)
 {
+    if (cert == NULL || cert->device_buf == NULL || cert->device_buf_sz == 0) {
+        printf("%s: valid certificate not provided\n", __func__);
+        return -1;
+    }
+
     int r = 0;
     // build the request
     bb6_msg_inprog_t *newmsg = bb6_alloc_request(BB6_TYPE_CERT);
@@ -118,6 +125,7 @@ int dload_send_cert(rm_cert_t *cert)
     r = bb6_add_tlv(newmsg, BB6_CERT_TLV, &metadata, sizeof(BB6_CERT_TLV_t));
     if (r != 0) {
         printf("%s: error adding metadata to the request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -125,6 +133,7 @@ int dload_send_cert(rm_cert_t *cert)
     r = bb6_add_tlv(newmsg, BB6_DATA_TLV, cert->device_buf, cert->device_buf_sz);
     if (r != 0) {
         printf("%s: error adding data to the request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -133,6 +142,7 @@ int dload_send_cert(rm_cert_t *cert)
     uint8_t *bb6bytes = bb6_serialize_request(newmsg, &bb6byteslen);
     if (bb6bytes == NULL) {
         printf("%s: error serializing BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -192,6 +202,7 @@ int dload_flash_write_delayed(uint64_t address, uint64_t offset, void *data, siz
     r = bb6_add_tlv(newmsg, BB6_IMAGE_TLV, &metadata, sizeof(BB6_IMAGE_TLV_t));
     if (r != 0) {
         printf("%s: error adding metadata to the request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -199,6 +210,7 @@ int dload_flash_write_delayed(uint64_t address, uint64_t offset, void *data, siz
     r = bb6_add_tlv(newmsg, BB6_DATA_TLV, data, length);
     if (r != 0) {
         printf("%s: error adding data to the request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -207,6 +219,7 @@ int dload_flash_write_delayed(uint64_t address, uint64_t offset, void *data, siz
     uint8_t *bb6bytes = bb6_serialize_request(newmsg, &bb6byteslen);
     if (bb6bytes == NULL) {
         printf("%s: error serializing BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -245,13 +258,14 @@ int dload_flash_write_delayed(uint64_t address, uint64_t offset, void *data, siz
     return 0;
 }
 
-int dload_flush_delayed()
+int dload_flush_delayed(void)
 {
     int r = 0;
     // build the request
     bb6_msg_inprog_t *newmsg = bb6_alloc_request(BB6_TYPE_FLUSH_DELAYED);
     if (newmsg == NULL) {
         printf("%s: error allocating BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
     // serialize the message
@@ -259,6 +273,7 @@ int dload_flush_delayed()
     uint8_t *bb6bytes = bb6_serialize_request(newmsg, &bb6byteslen);
     if (bb6bytes == NULL) {
         printf("%s: error serializing BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 
@@ -297,13 +312,14 @@ int dload_flush_delayed()
     return 0;
 }
 
-int dload_reset_osbl()
+int dload_reset_osbl(void)
 {
     int r = 0;
     // build the request
     bb6_msg_inprog_t *newmsg = bb6_alloc_request(BB6_TYPE_RESET);
     if (newmsg == NULL) {
         printf("%s: error allocating BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
     // serialize the message
@@ -311,6 +327,7 @@ int dload_reset_osbl()
     uint8_t *bb6bytes = bb6_serialize_request(newmsg, &bb6byteslen);
     if (bb6bytes == NULL) {
         printf("%s: error serializing BB6 request\n", __func__);
+        bb6_free_request(newmsg);
         return -1;
     }
 

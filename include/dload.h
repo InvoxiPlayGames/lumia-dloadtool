@@ -47,14 +47,14 @@ typedef struct _dload_version_t
 
 int dload_do_echo(uint8_t *buffer, size_t length);
 int dload_get_version(dload_version_t *out_version);
-int dload_reset();
-int dload_power_off();
+int dload_reset(void);
+int dload_power_off(void);
 
 //bb6 msgs
 int dload_do_control(uint32_t ctrl_reg, uint32_t ctrl_val);
 int dload_send_cert(rm_cert_t *cert);
 int dload_flash_write_delayed(uint64_t address, uint64_t offset, void *data, size_t length);
-int dload_flush_delayed();
-int dload_reset_osbl();
+int dload_flush_delayed(void);
+int dload_reset_osbl(void);
 
 #endif // DLOAD_H
