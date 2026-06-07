@@ -1,5 +1,5 @@
 /*
-    firmware_verify.h
+    firmware_flash.h
     Part of lumia-dloadtool
     Copyright (C) 2026 Emma / InvoxiPlayGames
 
@@ -17,13 +17,12 @@
     with this program; if not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FIRMWARE_VERIFY_H
-#define FIRMWARE_VERIFY_H
+#ifndef FIRMWARE_FLASH_H
+#define FIRMWARE_FLASH_H
 
 #include <stdio.h>
 #include "rm_cert.h"
 
-int verify_firmware_checksum(rm_cert_t *cert, FILE *fp, long offset);
-int verify_chunk_checksum(rm_cert_t *cert, int chunk_i, FILE *fp, long offset);
+int flash_firmware(rm_cert_t *cert, FILE *fp, long offset);
 
 #endif // FIRMWARE_VERIFY_H

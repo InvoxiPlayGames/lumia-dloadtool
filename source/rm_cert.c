@@ -1,3 +1,22 @@
+/*
+    rm_cert.c
+    Part of lumia-dloadtool
+    Copyright (C) 2026 Emma / InvoxiPlayGames
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -8,7 +27,8 @@
 #include "endian.h"
 #include "rm_cert.h"
 
-static void *safe_buffer_read(void *buffer, size_t buf_sz, size_t offset, size_t length) {
+static void *safe_buffer_read(void *buffer, size_t buf_sz, size_t offset, size_t length)
+{
     if (offset > buf_sz)
         return NULL;
     if (length > buf_sz - offset)
@@ -16,7 +36,8 @@ static void *safe_buffer_read(void *buffer, size_t buf_sz, size_t offset, size_t
     return (void *)((uint8_t *)buffer + offset);
 }
 
-int rm_cert_from_buffer(void *buf, size_t buf_sz, rm_cert_t *out) {
+int rm_cert_from_buffer(void *buf, size_t buf_sz, rm_cert_t *out)
+{
     if (out == NULL || buf == NULL) return kRmC_InvalidArg;
     out->buf = buf;
     out->buf_sz = buf_sz;
@@ -133,12 +154,14 @@ int rm_cert_from_buffer(void *buf, size_t buf_sz, rm_cert_t *out) {
     return kRmC_Success;
 }
 
-void rm_cert_free(rm_cert_t *buf) {
+void rm_cert_free(rm_cert_t *buf)
+{
     free(buf->buf);
     free(buf);
 }
 
-int rm_cert_from_file(FILE *fp, rm_cert_t **out) {
+int rm_cert_from_file(FILE *fp, rm_cert_t **out)
+{
     if (fp == NULL || out == NULL)
         return kRmC_InvalidArg;
     // read the header from the certificate file

@@ -1,9 +1,30 @@
+/*
+    dloadtool.c
+    Part of lumia-dloadtool
+    Copyright (C) 2026 Emma / InvoxiPlayGames
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <inttypes.h>
+#include <unistd.h>
 
 #include "bb6_msg_parser.h"
 #include "bb6_msg_builder.h"
@@ -15,6 +36,7 @@
 #include "device_connection.h"
 #include "rm_cert.h"
 #include "firmware_verify.h"
+#include "firmware_flash.h"
 
 void hexdump(const void *buf, size_t len)
 {
@@ -163,15 +185,15 @@ void parse_rm_cert(const char *filename)
         printf("target file: %s\n", parsed->file);
     } else if (LE(parsed->target->target_type) < kTargetFileWrite) {
         printf("target flash %s:\n", (LE(parsed->target->target_type) == kTargetFlashWrite) ? "write" : "erase");
-        printf("  start: 0x%llX\n", LE64(parsed->flash->flash_start));
-        printf("  size:  0x%llX\n", LE64(parsed->flash->flash_size));
+        printf("  start: 0x%"PRIX64"\n", LE64(parsed->flash->flash_start));
+        printf("  size:  0x%"PRIX64"\n", LE64(parsed->flash->flash_size));
     }
     if (parsed->chunk_hdr != NULL) {
         if (LE(parsed->chunk_hdr->hash_type) == kHashSha256) {
             rm_cert_chunk_sha256_t *chunks = (rm_cert_chunk_sha256_t *)parsed->chunks;
             for (int i = 0; i < LE(parsed->chunk_hdr->count); i++) {
                 printf("chunk %i:\n", i + 1);
-                printf("  range: 0x%llX - 0x%llX\n", chunks[i].start, chunks[i].end);
+                printf("  range: 0x%"PRIX64" - 0x%"PRIX64"\n", chunks[i].start, chunks[i].end);
                 printf("  hash:  ");
                 hexdump(chunks[i].sha256, 0x20);
             }
@@ -216,6 +238,69 @@ void verify_rm_file(const char *cert_filename, const char *data_filename)
     }
     fclose(fp);
 
+    rm_cert_free(parsed);
+    return;
+}
+
+
+
+void flash_rm_file(const char *cert_filename, const char *data_filename)
+{
+    FILE *cfp = fopen(cert_filename, "rb");
+    if (cfp == NULL) {
+        printf("failed to open certificate file\n");
+        return;
+    }
+    rm_cert_t *parsed = NULL;
+    int r = rm_cert_from_file(cfp, &parsed);
+    fclose(cfp);
+    if (r != kRmC_Success) {
+        printf("failed to parse certificate (%i)\n", r);
+        return;
+    }
+
+    FILE *fp = fopen(data_filename, "rb");
+    if (fp == NULL) {
+        printf("failed to open data file\n");
+        return;
+    }
+
+    // TODO(Emma): verify the .cert file matches the device that's connected
+
+    printf("!! about to flash firmware !!\n");
+    printf("if you do not want this, you should press CTRL+C NOW!!!\n");
+    fflush(stdout);
+    // and give someone else a piece of that .cert, and firmware file, that's distributed
+    // so we can restore these weird trash phones. cause what are you here for? to brick
+    // your device? press CTRL+C. i mean that with 100%, with 1000%.
+    sleep(5);
+
+    r = flash_firmware(parsed, fp, 0);
+    if (r == 0)
+    {
+        if (LE(parsed->info->flash_stage_maybe) <= kStageOsbl)
+        {
+            printf("rebooting device into OSBL mode...\n");
+            r = dload_reset_osbl();
+            if (r != kDload_Success)
+            {
+                printf("unknown error resetting device: %i\n", r);
+                return;
+            }
+        }
+        else
+        {
+            printf("rebooting device...\n");
+            r = dload_reset();
+            if (r != kDload_Success)
+            {
+                printf("unknown error resetting device: %i\n", r);
+                return;
+            }
+        }
+    }
+    
+    fclose(fp);
     rm_cert_free(parsed);
     return;
 }
@@ -267,6 +352,8 @@ int main(int argc, char **argv)
 
     if (argc >= 2 && strcasecmp(argv[1], "test") == 0) {
         do_tests();
+    } else if (argc >= 4 && strcasecmp(argv[1], "flash") == 0) {
+        flash_rm_file(argv[2], argv[3]);
     } else {
         dload_version_t ver;
         r = dload_get_version(&ver);

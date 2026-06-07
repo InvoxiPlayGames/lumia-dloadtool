@@ -59,6 +59,6 @@ typedef struct _BB6_SUBMIT_NOKIA_SIG_TLV_t {
     uint8_t unk3[0x8];
     uint8_t unk4[0x18]; // part of data returned in response to BB6_GET_NOKIA_KEY_TLV
     uint8_t signature[0x40];
-} BB6_SUBMIT_NOKIA_SIG_TLV;
+} BB6_SUBMIT_NOKIA_SIG_TLV_t;
 
 #endif // BB6_TLV_H

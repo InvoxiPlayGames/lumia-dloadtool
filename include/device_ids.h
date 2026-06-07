@@ -12,7 +12,7 @@
 // VID/PID pairs for the various Windows Mobile modes
 #define MICROSOFT_VID 0x045E
 #define WM7_MAINOS_PID 0x04EC
-#define WM7_FFU_PID 0x0710 // FFU/SLDR
+#define WM7_FFU_PID 0x0710 // FFU/SLDR, also Zune
 #define WM7_BLDR_PID 0x041E
 
 #endif // DEVICE_IDS_H

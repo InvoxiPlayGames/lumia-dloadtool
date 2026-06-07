@@ -5,9 +5,17 @@ DLOAD - the version info and the hashes available in the service/eng backdoor
 
 Lumia 800 (RM-801, 059N205, only 1 device):
   Build timestamp: 1317303536
-  Version data: 00 00 01 00 04 00 00 01 0a 00 00 00
+  Version data: 00 00 01 00 04 00 00 01 0A 00 00 00
 
-Lumia 610 (RM-835, 059P6L6, only 1 device):
+Lumia 800 (RM-801, 059N205, after flashing 12w22 osbl):
+  Build timestamp: 1329482405
+  Version data: 01 00 01 00 06 00 01 01 0C 00 00 00
+  From command 0x200:
+   0x72: 08f70ecd76f6e4ee142be82ba00143c3e4bc9103
+   0x73: 08f70ecd76f6e4ee142be82ba00143c3e4bc9103
+   0x74: 08f70ecd76f6e4ee142be82ba00143c3e4bc9103
+
+Lumia 610 (RM-835, 2 devices):
   Build timestamp: 1329903446
   Version data: 01 00 01 00 00 00 00 01 01 00 00 00
   From command 0x200:

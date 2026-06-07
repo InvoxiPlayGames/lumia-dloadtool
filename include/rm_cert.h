@@ -1,7 +1,32 @@
+/*
+    rm_cert.h
+    Part of lumia-dloadtool
+    Copyright (C) 2026 Emma / InvoxiPlayGames
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, see <https://www.gnu.org/licenses/>.
+
+    --
+
+    The structure definitions from this file - ones that read from original
+    .cert files - can be used under the public domain.
+*/
+
 #ifndef RM_CERT_H
 #define RM_CERT_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 // !! Unlike everything else, this struct is in BIG ENDIAN
 #define RMCERT_VERSION 0x121
@@ -34,7 +59,7 @@ typedef struct _rm_cert_chunk_sha256_t {
 typedef struct _rm_cert_chunk_sha1_t {
     uint64_t start;
     uint64_t end;
-    uint8_t sha1[0x20];
+    uint8_t sha1[0x14];
 } rm_cert_chunk_sha1_t;
 
 typedef enum _rm_cert_target_e {
