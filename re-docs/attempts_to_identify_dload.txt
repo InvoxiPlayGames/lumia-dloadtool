@@ -23,6 +23,14 @@ Lumia 610 (RM-835, 2 devices):
    0x73: 501aff8d3a1d2b693bd8fec40c1c55c5cb7f7e7d
    0x74: 501aff8d3a1d2b693bd8fec40c1c55c5cb7f7e7d
 
+Lumia 900 (RM-808, 059L6S0, only 1 device):
+  Build timestamp: 1330721550
+  Version data: 01 00 01 00 0B 00 01 01 28 00 00 00
+  From command 0x200:
+   0x72: 1998DD155A6041DE954072300317AAF81C9F845F
+   0x73: 1998DD155A6041DE954072300317AAF81C9F845F
+   0x74: 1998DD155A6041DE954072300317AAF81C9F845F
+
 TODO: fill this in! If values are the same across variants, remove the variant.
 
 ---
